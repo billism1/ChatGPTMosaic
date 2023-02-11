@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.IO.Abstractions;
 using System.Linq;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace PhotoMosaic
 {
@@ -16,15 +14,14 @@ namespace PhotoMosaic
             int tileSize = 25;
 
             // Load the source image
-            using var sourceImage = Image.FromFile(sourceImageFile);
+            using Image<Rgb24> sourceImage = Image.Load<Rgb24>(sourceImageFile);
 
-            // Create a target bitmap to hold the mosaic
-            using var targetImage = new Bitmap(sourceImage.Width, sourceImage.Height);
+            // Create a target image to hold the mosaic
+            using Image<Rgb24> targetImage = new Image<Rgb24>(sourceImage.Width, sourceImage.Height);
 
             // Get a list of images from the directory
-            var fileSystem = new FileSystem();
-            var imageFiles = fileSystem.Directory.GetFiles(imageDirectory).Where(f => f.EndsWith(".jpg") || f.EndsWith(".jpeg") || f.EndsWith(".png"));
-            var images = imageFiles.Select(f => Image.FromFile(f)).ToList();
+            var imageFiles = System.IO.Directory.GetFiles(imageDirectory).Where(f => f.EndsWith(".jpg") || f.EndsWith(".jpeg") || f.EndsWith(".png"));
+            var images = imageFiles.Select(f => Image.Load<Rgb24>(f)).ToList();
 
             // Loop through each tile in the target image
             for (int y = 0; y < sourceImage.Height; y += tileSize)
@@ -32,24 +29,23 @@ namespace PhotoMosaic
                 for (int x = 0; x < sourceImage.Width; x += tileSize)
                 {
                     // Get the average color of the current tile
-                    Color averageColor = GetAverageColor(sourceImage, x, y, tileSize, tileSize);
+                    Rgb24 averageColor = GetAverageColor(sourceImage, x, y, tileSize, tileSize);
 
                     // Find the closest match in the list of images
-                    Image closestMatchImage = FindClosestMatch(averageColor, images);
+                    Image<Rgb24> closestMatchImage = FindClosestMatch(averageColor, images);
 
                     // Draw the closest match image onto the target image
-                    using var g = Graphics.FromImage(targetImage);
-                    g.DrawImage(closestMatchImage, new Rectangle(x, y, tileSize, tileSize),
-                        new Rectangle(0, 0, closestMatchImage.Width, closestMatchImage.Height),
-                        GraphicsUnit.Pixel);
+                    targetImage.Mutate(c => c.DrawImage(closestMatchImage, new SixLabors.ImageSharp.Rectangle(x, y, tileSize, tileSize),
+                        new SixLabors.ImageSharp.Rectangle(0, 0, closestMatchImage.Width, closestMatchImage.Height),
+                        GraphicsOptions.Default));
                 }
             }
 
             // Save the target image
-            targetImage.Save("mosaic.jpg", ImageFormat.Jpeg);
+            targetImage.Save("mosaic.jpg");
         }
 
-        static Color GetAverageColor(Image image, int x, int y, int width, int height)
+        static Rgb24 GetAverageColor(Image<Rgb24> image, int x, int y, int width, int height)
         {
             // Calculate the average color of the specified region of the image
             int red = 0;
@@ -60,7 +56,7 @@ namespace PhotoMosaic
             {
                 for (int j = x; j < x + width; j++)
                 {
-                    Color pixelColor = ((Bitmap)image).GetPixel(j, i);
+                    Rgb24 pixelColor = image[j, i];
                     red += pixelColor.R;
                     green += pixelColor.G;
                     blue += pixelColor.B;
@@ -70,17 +66,17 @@ namespace PhotoMosaic
             red /= count;
             green /= count;
             blue /= count;
-            return Color.FromArgb(red, green, blue);
+            return new Rgb24(red, green, blue);
         }
 
-        static Image FindClosestMatch(Color color, IEnumerable<Image> images)
+        static Image<Rgb24> FindClosestMatch(Rgb24 color, List<Image<Rgb24>> images)
         {
             // Find the image with the closest color match
-            Image closestMatchImage = null;
+            Image<Rgb24> closestMatchImage = null;
             int closestDistance = int.MaxValue;
             foreach (var image in images)
             {
-                Color averageColor = GetAverageColor(image, 0, 0, image.Width, image.Height);
+                Rgb24 averageColor = GetAverageColor(image, 0, 0, image.Width, image.Height);
                 int distance = GetColorDistance(color, averageColor);
                 if (distance < closestDistance)
                 {
@@ -91,7 +87,7 @@ namespace PhotoMosaic
             return closestMatchImage;
         }
 
-        static int GetColorDistance(Color color1, Color color2)
+        static int GetColorDistance(Rgb24 color1, Rgb24 color2)
         {
             // Calculate the distance between two colors
             int redDiff = color1.R - color2.R;
