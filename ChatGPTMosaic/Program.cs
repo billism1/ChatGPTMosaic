@@ -2,6 +2,8 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.IO.Abstractions;
+using System.Linq;
 
 namespace PhotoMosaic
 {
@@ -14,10 +16,15 @@ namespace PhotoMosaic
             int tileSize = 25;
 
             // Load the source image
-            Image sourceImage = Image.FromFile(sourceImageFile);
+            using var sourceImage = Image.FromFile(sourceImageFile);
 
             // Create a target bitmap to hold the mosaic
-            Bitmap targetImage = new Bitmap(sourceImage.Width, sourceImage.Height);
+            using var targetImage = new Bitmap(sourceImage.Width, sourceImage.Height);
+
+            // Get a list of images from the directory
+            var fileSystem = new FileSystem();
+            var imageFiles = fileSystem.Directory.GetFiles(imageDirectory).Where(f => f.EndsWith(".jpg") || f.EndsWith(".jpeg") || f.EndsWith(".png"));
+            var images = imageFiles.Select(f => Image.FromFile(f)).ToList();
 
             // Loop through each tile in the target image
             for (int y = 0; y < sourceImage.Height; y += tileSize)
@@ -27,19 +34,14 @@ namespace PhotoMosaic
                     // Get the average color of the current tile
                     Color averageColor = GetAverageColor(sourceImage, x, y, tileSize, tileSize);
 
-                    // Find the closest match in the directory of images
-                    string closestMatchFile = FindClosestMatch(averageColor, imageDirectory);
-
-                    // Load the closest match image
-                    Image closestMatchImage = Image.FromFile(closestMatchFile);
+                    // Find the closest match in the list of images
+                    Image closestMatchImage = FindClosestMatch(averageColor, images);
 
                     // Draw the closest match image onto the target image
-                    using (Graphics g = Graphics.FromImage(targetImage))
-                    {
-                        g.DrawImage(closestMatchImage, new Rectangle(x, y, tileSize, tileSize),
-                            new Rectangle(0, 0, closestMatchImage.Width, closestMatchImage.Height),
-                            GraphicsUnit.Pixel);
-                    }
+                    using var g = Graphics.FromImage(targetImage);
+                    g.DrawImage(closestMatchImage, new Rectangle(x, y, tileSize, tileSize),
+                        new Rectangle(0, 0, closestMatchImage.Width, closestMatchImage.Height),
+                        GraphicsUnit.Pixel);
                 }
             }
 
@@ -71,23 +73,22 @@ namespace PhotoMosaic
             return Color.FromArgb(red, green, blue);
         }
 
-        static string FindClosestMatch(Color color, string imageDirectory)
+        static Image FindClosestMatch(Color color, IEnumerable<Image> images)
         {
-            // Find the file in the directory of images with the closest color match
+            // Find the image with the closest color match
+            Image closestMatchImage = null;
             int closestDistance = int.MaxValue;
-            string closestMatchFile = null;
-            foreach (string file in Directory.GetFiles(imageDirectory))
+            foreach (var image in images)
             {
-                Image image = Image.FromFile(file);
                 Color averageColor = GetAverageColor(image, 0, 0, image.Width, image.Height);
                 int distance = GetColorDistance(color, averageColor);
                 if (distance < closestDistance)
                 {
                     closestDistance = distance;
-                    closestMatchFile = file;
+                    closestMatchImage = image;
                 }
             }
-            return closestMatchFile;
+            return closestMatchImage;
         }
 
         static int GetColorDistance(Color color1, Color color2)
