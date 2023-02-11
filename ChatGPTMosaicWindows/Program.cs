@@ -23,9 +23,9 @@ namespace PhotoMosaic
             Bitmap targetImage = new Bitmap(sourceImage.Width, sourceImage.Height);
 
             // Loop through each tile in the target image
-            for (int y = 0; y < sourceImage.Height; y += tileSize)
+            for (int y = 0; y < sourceImage.Height - tileSize; y += tileSize)
             {
-                for (int x = 0; x < sourceImage.Width; x += tileSize)
+                for (int x = 0; x < sourceImage.Width - tileSize; x += tileSize)
                 {
                     // Get the average color of the current tile
                     Color averageColor = GetAverageColor(sourceImage, x, y, tileSize, tileSize);
