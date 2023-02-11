@@ -36,9 +36,8 @@ namespace PhotoMosaic
                     Image<Rgb24> closestMatchImage = FindClosestMatch(averageColor, images);
 
                     // Draw the closest match image onto the target image
-                    targetImage.Mutate(c => c.DrawImage(closestMatchImage, new SixLabors.ImageSharp.Rectangle(x, y, tileSize, tileSize),
-                        new SixLabors.ImageSharp.Rectangle(0, 0, closestMatchImage.Width, closestMatchImage.Height),
-                        GraphicsOptions.Default));
+                    closestMatchImage.Mutate(c => c.Resize(tileSize, tileSize));
+                    targetImage.Mutate(c => c.DrawImage(closestMatchImage, new Point(x, y), 1f));
                 }
             }
 

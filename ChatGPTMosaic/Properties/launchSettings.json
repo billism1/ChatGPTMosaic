@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ChatGPTMosaic": {
+      "commandName": "Project",
+      "workingDirectory": "C:\\Users\\Bill Krahmer\\Desktop\\scratch\\stock_photos"
+    }
+  }
+}
