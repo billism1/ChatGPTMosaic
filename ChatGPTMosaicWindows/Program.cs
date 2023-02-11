@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -7,6 +8,8 @@ namespace PhotoMosaic
 {
     class Program
     {
+        static Dictionary<string, Color> imagesAverageColor = new Dictionary<string, Color>();
+
         static void Main(string[] args)
         {
             string sourceImageFile = "source.jpg";
@@ -71,6 +74,12 @@ namespace PhotoMosaic
             return Color.FromArgb(red, green, blue);
         }
 
+        static Color GetAverageColor(string filename)
+        {
+            Image image = Image.FromFile(filename);
+            return GetAverageColor(image, 0, 0, image.Width, image.Height);
+        }
+
         static string FindClosestMatch(Color color, string imageDirectory)
         {
             // Find the file in the directory of images with the closest color match
@@ -78,8 +87,10 @@ namespace PhotoMosaic
             string closestMatchFile = null;
             foreach (string file in Directory.GetFiles(imageDirectory))
             {
-                Image image = Image.FromFile(file);
-                Color averageColor = GetAverageColor(image, 0, 0, image.Width, image.Height);
+                Color averageColor = imagesAverageColor.ContainsKey(file)
+                    ? imagesAverageColor[file]
+                    : imagesAverageColor[file] = GetAverageColor(file);
+
                 int distance = GetColorDistance(color, averageColor);
                 if (distance < closestDistance)
                 {
