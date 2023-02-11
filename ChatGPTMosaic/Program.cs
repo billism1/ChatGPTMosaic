@@ -2,6 +2,7 @@
 using System.Linq;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace PhotoMosaic
 {
@@ -66,7 +67,7 @@ namespace PhotoMosaic
             red /= count;
             green /= count;
             blue /= count;
-            return new Rgb24(red, green, blue);
+            return new Rgb24((byte)red, (byte)green, (byte)blue);
         }
 
         static Image<Rgb24> FindClosestMatch(Rgb24 color, List<Image<Rgb24>> images)
