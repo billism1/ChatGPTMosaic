@@ -1,4 +1,4 @@
-> Write C# code to generate a photo mosaic given a source images and a directory of images to use.
+`Write C# code to generate a photo mosaic given a source images and a directory of images to use.`
 > 
 > Here's an example of how you could generate a photo mosaic in C# using the System.Drawing and System.IO classes:
 > 
@@ -89,7 +89,7 @@
 >                 Color averageColor = GetAverageColor(image, 0, 0, image.Width, image.Height);
 > ```
 > 
-> You didn't finish.
+`You didn't finish.`
 > 
 > My apologies. Here is the rest of the code:
 > 
@@ -120,7 +120,7 @@
 > 
 > This code loads a source image, then loops through each tile in the image and finds the closest color match in a directory of images. It then draws the closest match onto a target image, which is then saved as a photo mosaic. The `GetAverageColor` and `FindClosestMatch` methods use the Euclidean distance formula to compare the RGB values of the colors and find the closest match.
 > 
-> Thanks. That worked in .NET 4.7.2. Can you generate code that works in .NET 6.0?
+`Thanks. That worked in .NET 4.7.2. Can you generate code that works in .NET 6.0?`
 > 
 > Here's an updated version of the code that works with .NET 6.0, using the System.Drawing.Common and System.IO.Abstractions packages:
 > 
@@ -207,7 +207,7 @@
 >             // Find
 > ```
 > 
-> You didn't finish.
+`You didn't finish.`
 > 
 > I'm sorry for the interruption. Here's the rest of the code:
 > 
@@ -244,7 +244,7 @@
 > 
 > This code is similar to the previous version, but uses the `System.IO.Abstractions` package to handle file system operations, and the `System.Drawing.Common` package to handle image operations, both of which are compatible with .NET 6.0.
 > 
-> Image.FromFile is not part of .NET 6.0, so that won't work.
+`Image.FromFile is not part of .NET 6.0, so that won't work.`
 > 
 > My apologies. You are correct, the `Image.FromFile` method is not available in .NET 6.0. Here's an updated version of the code that uses the `SixLabors.ImageSharp` library to load images:
 > 
@@ -325,7 +325,7 @@
 >         static Image
 > ```
 > 
-> You didn't finish.
+`You didn't finish.`
 > 
 > I apologize for the mistake. Here's the rest of the code:
 > 
