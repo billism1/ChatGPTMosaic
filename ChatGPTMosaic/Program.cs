@@ -9,13 +9,13 @@ namespace PhotoMosaic
     class Program
     {
         static Dictionary<Image, Rgb24> imagesAverageColor = new Dictionary<Image, Rgb24>();
-        static Image LastMatch = null;
 
         static void Main(string[] args)
         {
-            string sourceImageFile = "source.jpg";
-            string imageDirectory = "images";
-            int tileSize = 25;
+            string sourceImageFile = args[0];
+            string imageDirectory = args[1];
+            int tileSize = int.Parse(args[2]);
+            string destinationFile = args[3];
 
             // Load the source image
             using Image<Rgb24> sourceImage = Image.Load<Rgb24>(sourceImageFile);
@@ -48,27 +48,31 @@ namespace PhotoMosaic
             targetImage.Save("mosaic.jpg");
         }
 
-        static Rgb24 GetAverageColor(Image<Rgb24> image, int x, int y, int width, int height)
+        private static Rgb24 GetAverageColor(Image<Rgb24> image, int x, int y, int width, int height)
         {
-            // Calculate the average color of the specified region of the image
-            int red = 0;
-            int green = 0;
-            int blue = 0;
-            int count = 0;
-            for (int i = y; i < y + height; i++)
+            int red = 0, green = 0, blue = 0;
+            int pixelCount = 0;
+
+            for (int j = y; j < y + height && j < image.Height; j++)
             {
-                for (int j = x; j < x + width; j++)
+                for (int i = x; i < x + width && i < image.Width; i++)
                 {
-                    Rgb24 pixelColor = image[j, i];
-                    red += pixelColor.R;
-                    green += pixelColor.G;
-                    blue += pixelColor.B;
-                    count++;
+                    Rgb24 color = image[j, i];
+                    red += color.R;
+                    green += color.G;
+                    blue += color.B;
+                    pixelCount++;
                 }
             }
-            red /= count;
-            green /= count;
-            blue /= count;
+
+            if (pixelCount == 0)
+            {
+                return new Rgb24(0, 0, 0);
+            }
+
+            red /= pixelCount;
+            green /= pixelCount;
+            blue /= pixelCount;
             return new Rgb24((byte)red, (byte)green, (byte)blue);
         }
 
