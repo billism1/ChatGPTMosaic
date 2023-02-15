@@ -45,7 +45,7 @@ namespace PhotoMosaic
             }
 
             // Save the target image
-            targetImage.Save("mosaic.jpg");
+            targetImage.Save(destinationFile);
         }
 
         private static Rgb24 GetAverageColor(Image<Rgb24> image, int x, int y, int width, int height)
