@@ -53,11 +53,11 @@ namespace PhotoMosaic
             int red = 0, green = 0, blue = 0;
             int pixelCount = 0;
 
-            for (int j = y; j < y + height && j < image.Height; j++)
+            for (int i = x; i < x + width && i < image.Width; i++)
             {
-                for (int i = x; i < x + width && i < image.Width; i++)
+                for (int j = y; j < y + height && j < image.Height; j++)
                 {
-                    Rgb24 color = image[j, i];
+                    Rgb24 color = image[i, j];
                     red += color.R;
                     green += color.G;
                     blue += color.B;
