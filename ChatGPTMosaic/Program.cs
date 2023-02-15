@@ -8,6 +8,8 @@ namespace PhotoMosaic
 {
     class Program
     {
+        static Dictionary<Image, Rgb24> imagesAverageColor = new Dictionary<Image, Rgb24>();
+
         static void Main(string[] args)
         {
             string sourceImageFile = args[0];
@@ -81,7 +83,9 @@ namespace PhotoMosaic
             int closestDistance = int.MaxValue;
             foreach (var image in images)
             {
-                Rgb24 averageColor = GetAverageColor(image, 0, 0, image.Width, image.Height);
+                Rgb24 averageColor = imagesAverageColor.ContainsKey(image)
+                    ? imagesAverageColor[image]
+                    : imagesAverageColor[image] = GetAverageColor(image, 0, 0, image.Width, image.Height);
 
                 int distance = GetColorDistance(color, averageColor);
                 if (distance < closestDistance)
